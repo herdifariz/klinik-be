@@ -2,20 +2,36 @@ import { z } from 'zod';
 import { UserRole } from '@prisma/client';
 
 export const createUserSchema = z.object({
-  body: z.object({
+  body: z.preprocess((val: any) => {
+    if (val && typeof val === 'object') {
+      return {
+        ...val,
+        fullName: val.fullName || val.name,
+      };
+    }
+    return val;
+  }, z.object({
     email: z.string().email('Invalid email format').toLowerCase(),
     password: z.string().min(8, 'Min 8 characters'),
     fullName: z.string().min(2).max(255),
     role: z.nativeEnum(UserRole),
-  }),
+  })),
 });
 
 export const updateUserSchema = z.object({
-  body: z.object({
+  body: z.preprocess((val: any) => {
+    if (val && typeof val === 'object') {
+      return {
+        ...val,
+        fullName: val.fullName || val.name,
+      };
+    }
+    return val;
+  }, z.object({
     email: z.string().email('Invalid email format').toLowerCase().optional(),
     fullName: z.string().min(2).max(255).optional(),
     isActive: z.boolean().optional(),
-  }),
+  })),
 });
 
 export const changeRoleSchema = z.object({
